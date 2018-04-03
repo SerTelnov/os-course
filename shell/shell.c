@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char** get_message(char* line, ssize_t line_size) {
+char** parse_message(char* line, ssize_t line_size) {
     char ** message = malloc(line_size * sizeof(char*));
     char *token;
     const char* splitor = " \r\n\t";
@@ -14,19 +14,6 @@ char** get_message(char* line, ssize_t line_size) {
     }
     message[position] = NULL;
     return message;
-}
-
-// 1 - exit, 2 - help, 0 - exec, -1 - error
-int get_message_info(char ** message) {
-    if (message[0] == NULL) {
-        return -1;
-    } else if (strcmp(message[0], "exit") == 0) {    
-        return 1;
-    } else if (strcmp(message[0], "") == 0) {
-        return 3;
-    } else {
-        return 0;
-    }
 }
 
 void execute(char** argv) {
@@ -56,13 +43,13 @@ int main(int argc, char ** argv) {
         if (read_size < 0) {
             break;
         }
-        char ** message = get_message(buffer, read_size);      
-        const int info = get_message_info(message);
-        if (info == 0) {
-            execute(message);
-            printf("\n");
-        } else if (info == 1) {
+        char ** message = parse_message(buffer, read_size);      
+        if (message[0] == NULL) {
+            continue;
+        } else if (strcmp(message[0], "exit") == 0) {    
             break;
+        } else if (strcmp(message[0], "") != 0) {
+            execute(message);
         }
         free(message);
     }
