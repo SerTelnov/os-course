@@ -1,0 +1,11 @@
+./find ./Examples -name ex1
+./find ./Examples -inum 289782
+./find ./Examples -inum 289788
+./find ./Examples -name ex1 -inum 289782
+./find ./Examples -name ex1 -inum 289788
+./find ./Examples -size =40
+./find ./Examples -size +0
+./find ./Examples -size -50
+./find ./Examples -nlinks 3
+./find ./Examples -name ex1 -exec ./counter
+./find ./Examples -size +0 -exec ./counter
