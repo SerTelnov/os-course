@@ -12,7 +12,7 @@
 
 class task {
 public:
-    task() {        
+    task() {
     }
     
     virtual bool exec(struct dirent* dir, struct stat buf, char* path, const char* item) = 0;
@@ -37,35 +37,22 @@ class task_size : task {
 public:
     task_size(char* value) 
         : task()
-    {
-        if (value[0] == '+') {
-            status = 1;
-        } else if (value[0] == '-') {
-            status = -1;
-        } else {
-            status = 0;
-        }
-
-        num = atoi(value + 1);
-    }
+        , status(value[0])
+        , num(atoi(value + 1))
+    { }
 
     bool exec(struct dirent* dir, struct stat buf, char* path, const char* item) {
-        if (dir->d_type != DT_REG) {
-            return false;
-        }         
-        int size = buf.st_size;
-
-        if (status == 0) {
-            return num == size;
-        } else if (status == 1) {
-            return num < size;
+        if (status == '=') {
+            return num == buf.st_size;
+        } else if (status == '+') {
+            return num < buf.st_size;
         } else {
-            return num > size;
+            return num > buf.st_size;
         }
     }
 
 private:
-    int status;
+    char status;
     int num;
 };
 

@@ -74,9 +74,10 @@ int walkDir(const char * path) {
         strcpy(new_path, path);
         strcat(new_path, "/");
         strcat(new_path, curr);
-        exec(pDirent, new_path, curr);
         if (pDirent->d_type == DT_DIR) {
             walkDir(new_path);
+        } else if (pDirent->d_type == DT_REG) {
+            exec(pDirent, new_path, curr);
         }
         delete [] new_path;
     }
