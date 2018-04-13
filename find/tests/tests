@@ -1,8 +1,4 @@
 ./find/out/find ./find/examples -name ex1
-./find/out/find ./find/examples -inum 289782
-./find/out/find ./find/examples -inum 289788
-./find/out/find ./find/examples -name ex1 -inum 289782
-./find/out/find ./find/examples -name ex1 -inum 289788
 ./find/out/find ./find/examples -size =40
 ./find/out/find ./find/examples -size -40 -size +10
 ./find/out/find ./find/examples -size =40 -size -50

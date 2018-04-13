@@ -39,7 +39,12 @@ public:
         : task()
         , status(value[0])
         , num(atoi(value + 1))
-    { }
+    {
+        if (status != '-' || status != '=' || status != '+') {
+            std::cout << "Invalid command for -size: '" << status << "'\n";
+            exit(1);
+        }    
+    }
 
     bool exec(struct dirent* dir, struct stat buf, char* path, const char* item) {
         if (status == '=') {
@@ -102,10 +107,9 @@ public:
         } else if (pid > 0) {
             pid_t wpid;
             int status;
-            do {
-                wpid = waitpid(pid, &status, WUNTRACED);
-            } while(!WIFEXITED(status) && !WIFSIGNALED(status));
-            std::cout << " for file: '" << item << "'\n";
+            // do {
+            wpid = waitpid(pid, &status, WUNTRACED);
+            // } while(!WIFEXITED(status) && !WIFSIGNALED(status));
         }   
     }
 
