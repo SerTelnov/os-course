@@ -1,2 +1,8 @@
+# Out files
 out/
+*.zip
+.vscode
+.DS_Store
+
+# Private files
 gym.c
