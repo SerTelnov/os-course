@@ -53,7 +53,7 @@ int append_str(char* buffer, int index, char* pattern, int pattern_len) {
 
 void send_message(const int socket_fd, char * mes, size_t mes_len) {
     if (write(socket_fd, mes, mes_len) < 0) {
-        perror("Can't send message\n");
+        perror("Can't send message");
     }
 }
 

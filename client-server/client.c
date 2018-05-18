@@ -33,34 +33,29 @@ int main(int argc, char ** argv) {
         perror("inet_pton error");
         return 1;
     }
-    servaddr.sin_port = htons(5265);
+    servaddr.sin_port = htons(5937);
 
     if (connect(socket_fd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         perror("Can't connect to server");
         return 1;
     }
-
-    struct timeval timeout;
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
-    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
  
-    char send_line[100];
-    char answer_line[100];
+    char send_buf[100];
+    char answer_buf[100];
 
     while(1) {
         printf("write command: ");
-        fgets(send_line, 100, stdin);
-        send_message(socket_fd, send_line, strlen(send_line) + 1);
+        fgets(send_buf, 100, stdin);
+        send_message(socket_fd, send_buf, strlen(send_buf) + 1);
 
-        if (equals_string(send_line, "exit")) {
+        if (equals_string(send_buf, "exit")) {
             break;
         }
 
-        if (read_message(socket_fd, answer_line) < 0) {
+        if (read_message(socket_fd, answer_buf) < 0) {
             break;
         }
-        printf("%s\n", answer_line);
+        printf("%s\n", answer_buf);
     } 
     close(socket_fd);
     return 0;
