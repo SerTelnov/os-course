@@ -11,7 +11,7 @@
 
 int equals_string(char*, char*);
 void send_message(const int, char*, size_t);
-void read_message(int, char*);
+int read_message(int, char*);
 
 int main(int argc, char ** argv) {
     if (argc < 2) {
@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
         perror("inet_pton error");
         return 1;
     }
-    servaddr.sin_port = htons(5000);
+    servaddr.sin_port = htons(5265);
 
     if (connect(socket_fd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         perror("Can't connect to server");
@@ -57,9 +57,10 @@ int main(int argc, char ** argv) {
             break;
         }
 
-        read_message(socket_fd, answer_line);
+        if (read_message(socket_fd, answer_line) < 0) {
+            break;
+        }
         printf("%s\n", answer_line);
-        bzero(send_line, 100);
     } 
     close(socket_fd);
     return 0;

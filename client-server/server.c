@@ -12,7 +12,8 @@
 
 int equals_string(char*, char*);
 void send_message(const int, char*, size_t);
-void read_message(int, char*);
+int read_message(int, char*);
+int append_str(char*, int, char*, int);
 
 int main(int argc, char ** argv) {
     if (argc < 2) {
@@ -31,11 +32,13 @@ int main(int argc, char ** argv) {
     addr.sin_family = AF_INET;
     if (inet_pton(AF_INET, ip, &addr.sin_addr) <= 0) {
         perror("\ninet_pton error");
+        return 1;
     }
-    addr.sin_port = htons(5000);
+    addr.sin_port = htons(5265);
  
     if (bind(listen_fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         perror("\nbind error");
+        return 1;
     }
  
     listen(listen_fd, 10);
@@ -43,8 +46,14 @@ int main(int argc, char ** argv) {
     char read_buffer[100];
     char write_buffer[100];
 
-    char dictionary[1000][100];
     FILE * dict_file = fopen("dictionary.txt", "r");
+
+    if (dict_file == NULL) {
+        perror("Can't open file: 'dictionary.txt'");
+        return 1;
+    }
+
+    char dictionary[1000][100];
     for (int i = 0; i != 1000; ++i) {
         fscanf(dict_file, "%s", dictionary[i]);
     }
@@ -52,27 +61,36 @@ int main(int argc, char ** argv) {
     while(1) {
         int socket_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
         while (1) {
-            recv(socket_fd, read_buffer, 100, 0);
+            int info = recv(socket_fd, read_buffer, 100, 0);
+            if (info == 0) {
+                perror("connection lost");
+                break;
+            } else if (info < 0) {
+                continue;
+            }
+
+            int buffer_index = 0;
 
             if (equals_string(read_buffer, "help")) {
-                send_message(socket_fd, "commands:\n'localtime' to show time\n'exit' to exit\n", 51);
-                send_message(socket_fd, "dict <word>", 12);
+                buffer_index = append_str(write_buffer, buffer_index, "commands:\n'localtime' to show time\n'exit' to exit\n", 51);
+                buffer_index = append_str(write_buffer, buffer_index, "dict <word>", 12);
             } else if (equals_string(read_buffer, "localtime")) {
                 time_t rawtime = time(NULL);
                 struct tm * timeinfo = localtime(&rawtime);
 
-                send_message(socket_fd, "Current local time: ", 21);
-                strcpy(write_buffer, asctime(timeinfo));
-                send_message(socket_fd, write_buffer, strlen(write_buffer) + 1);
+                buffer_index = append_str(write_buffer, buffer_index, "Current local time: ", 21);
+                char * time_str = asctime(timeinfo);
+                buffer_index = append_str(write_buffer, buffer_index, time_str, strlen(time_str) + 1);
             } else if (equals_string(read_buffer, "exit")) {
                 break;
             } else if (equals_string(read_buffer, "dict")) {
                 const int len = strlen(read_buffer);
                 if (len <= 5) {
-                    perror("Usage dict <word>");
+                    buffer_index = append_str(write_buffer, buffer_index, "Usage: dict <word>", 19);
                 } else {
                     char word[len];
                     stpcpy(word, read_buffer + 5);
+                    word[strlen(word) - 1] = '\0';
 
                     int contain = 0;
                     for (int i = 0; i != 1000; ++i) {
@@ -83,16 +101,17 @@ int main(int argc, char ** argv) {
                     }
 
                     if (contain) {
-                        send_message(socket_fd, "contains in dictionary: ", 25);
+                        buffer_index = append_str(write_buffer, buffer_index, "contains in dictionary: ", 25);
                     } else {
-                        send_message(socket_fd, "not contains in dictionary: ", 29);
+                        buffer_index = append_str(write_buffer, buffer_index, "not contains in dictionary: ", 29);
                     }
-                    send_message(socket_fd, word, strlen(word) + 1);
+                    buffer_index = append_str(write_buffer, buffer_index, word, strlen(word) + 1);
                 }
             } else {
-                send_message(socket_fd, "try: 'help'", 12);
+                buffer_index = append_str(write_buffer, buffer_index, "try: 'help'", 12);
             }
-            send_message(socket_fd, "~~", 3);
+            buffer_index = append_str(write_buffer, buffer_index, "~~", 3);
+            send_message(socket_fd, write_buffer, buffer_index);
         }
         close(socket_fd);
     }

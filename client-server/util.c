@@ -1,11 +1,19 @@
 #include <string.h>
 
-int is_line_end(char* str) {
+int end_line(char* str) {
     const int len = strlen(str);
-    return len >= 2 && str[len - 1] == '~' && str[len - 2] == '~';
+    if (len < 2) {
+        return -1;
+    }
+    for (int i = len - 1; i >= 1; --i) {
+        if (str[i] == '~' && str[i - 1] == '~') {
+            return i - 1;
+        }
+    }
+    return -1;
 }
 
-void read_message(int socket_fd, char* reader) {
+int read_message(int socket_fd, char* reader) {
     bzero(reader, 100);
     char buffer[100];
     size_t index = 0;
@@ -15,23 +23,36 @@ void read_message(int socket_fd, char* reader) {
         info = recv(socket_fd, buffer, 100, 0);
         if (info < 0) {
             perror("recv error");
+            break;
+        } else if (info == 0) {
+          perror("connection closed");
+          return -1;
         } else if (info > 0) {
-            const int len = strlen(buffer);
+            const int len = strlen(buffer) + 1;
             for (int i = 0; i != len; ++i) {
                 reader[index + i] = buffer[i];
             }
-            index += len;
+            index += len - 1;
             
-            if (is_line_end(reader)) {
-                reader[index - 2] = '\0';
-                return;
+            int end_line_index = end_line(reader);
+            if (end_line_index != -1) {
+                reader[end_line_index] = '\0';
+                return 0;
             }
         }
     }
+    return 1;
+}
+
+int append_str(char* buffer, int index, char* pattern, int pattern_len) {
+    for (int i = 0; i != pattern_len; ++i) {
+        buffer[index + i] = pattern[i];
+    }
+    return index + pattern_len - 1;
 }
 
 void send_message(const int socket_fd, char * mes, size_t mes_len) {
-    if (send(socket_fd, mes, mes_len, 0) < 0) {
+    if (write(socket_fd, mes, mes_len) < 0) {
         perror("Can't send message\n");
     }
 }

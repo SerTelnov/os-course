@@ -10,5 +10,11 @@ run:
 	./out/server 127.0.0.1 &
 	./out/client 127.0.0.1
 
+run_client:
+	./out/client 127.0.0.1
+
+run_server:
+	./out/server 127.0.0.1 &
+
 clean: 
 	rm -f out/*
