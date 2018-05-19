@@ -6,3 +6,4 @@ out/
 
 # Private files
 gym.c
+kqueue-example
