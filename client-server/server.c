@@ -56,9 +56,9 @@ int main(int argc, char ** argv) {
     for (int i = 0; i != 1000; ++i) {
         fscanf(dict_file, "%s", dictionary[i]);
     }
-    
+
     while(1) {
-        int socket_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
+        int socket_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);    
         while (1) {
             int info = recv(socket_fd, read_buffer, 100, 0);
             if (info == 0) {
