@@ -32,7 +32,7 @@ int init_server(char * ip) {
         perror("\ninet_pton error");
         return -1;
     }
-    addr.sin_port = htons(6457);
+    addr.sin_port = htons(6450);
  
     if (bind(listen_fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         perror("\nbind error");

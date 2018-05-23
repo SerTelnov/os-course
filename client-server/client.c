@@ -35,7 +35,7 @@ int main(int argc, char ** argv) {
         perror("inet_pton error");
         return 1;
     }
-    servaddr.sin_port = htons(6457);
+    servaddr.sin_port = htons(6450);
 
     if (connect(socket_fd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         perror("Can't connect to server");
@@ -61,6 +61,8 @@ int main(int argc, char ** argv) {
 
     int running = 1;
     while(running) {
+        bzero(send_buf, 100);
+        bzero(answer_buf, 100);
         printf("write command: ");
         fgets(send_buf, 100, stdin);
         send_message(socket_fd, send_buf, strlen(send_buf) + 1);
